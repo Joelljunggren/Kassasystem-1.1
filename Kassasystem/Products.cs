@@ -8,21 +8,19 @@ namespace Kassasystem
 {
     public class Products
     {
-        List<Products> product = new List<Products>();
 
         public int ProductId { get; set; }
+        public string ProductName { get; set; }
         public int Price { get; set; }
         public string PriceType { get; set; }
-        public string ProductName { get; set; }
-        public int Amount { get; set; }
 
-        public double GetPrice()
-        {
-            var totalprice = 0;
+        //public double GetPrice()
+        //{
+        //    var totalprice = 0;
 
-            totalprice = Price * Amount;
+        //    totalprice = Price * Amount;
 
-            return totalprice;
-        }
+        //    return totalprice;
+        //}
     }
 }
