@@ -54,10 +54,9 @@ namespace Kassasystem
         public void NewCustomer()
         {
             Console.Clear();
-            foreach (var products in product)
+            foreach (var product in product)
             {
-                //products.GetPrice();
-                Console.WriteLine($"{products.ProductName}, {products.Price}kr/{products.PriceType}, ID: {products.ProductId}");
+                Console.WriteLine($"{product.ProductName}, {product.Price}kr/{product.PriceType}, ID: {product.ProductId}");
             }
 
             Console.WriteLine("\nKASSA");
@@ -66,23 +65,43 @@ namespace Kassasystem
             Console.WriteLine("<productid> <antal>");
             Console.WriteLine("<PAY>");
             Console.Write("Kommando: ");
-            var kommando = Console.ReadLine();
+            var kommando = Console.ReadLine().ToUpper();
             var splitItems = kommando.Split(' ');
 
-            //Hela skiten här är skevt, vill egentligen kolla igenom mina products för att se efter om splitItems[0]
-            //matchar ett ID och sen lägga till hela objektet i listan receipt.
-            //Kan då även använda det som felhantering så att man inte kan lägga till produkter som inte finns. 
             if (kommando == "PAY")
                 SaveToFile();
 
+            if (!int.TryParse(splitItems[0], out int id)) ;
+            if (!int.TryParse(splitItems[1], out int antal)) ;
+
+            Products products = product.Find(x => x.ProductId == id);
+            while (products == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Hittar inte ID");
+                Console.ResetColor();
+                Console.Write("Kommando: ");
+                kommando = Console.ReadLine();
+                splitItems = kommando.Split(' ');
+
+                if (!int.TryParse(splitItems[0], out id)) ;
+                products = product.Find(x => x.ProductId == id);
+            }
+
+            var productName = products.ProductName;
+            if (!int.TryParse(splitItems[1], out antal)) ;
+            var price = products.Price;
+            var totalPrice = products.Price * antal;
+
+
             receipt.Add(new Receipt
             {
-                //förstår inte hur jag plockar med price, productname osv från products
-                ProductId = Convert.ToInt32(splitItems[0]),
-                Amount = Convert.ToInt32(splitItems[1]),
-                TotalCost = Convert.ToInt32(splitItems[1])
-            }); //måste på något sätt få in products.price * split 1 här.
-                //Vill se till så att det bara finns en purchaseTime för kvittot. Inte för varje gång jag lägger till en produkt
+                ProductName = productName,
+                ProductId = id,
+                Amount = antal,
+                Price = price,
+                TotalCost = totalPrice,
+            });
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Lägger till i kvittot");
@@ -98,11 +117,35 @@ namespace Kassasystem
                 if (kommando == "PAY")
                     SaveToFile();
 
+                if (!int.TryParse(splitItems[0], out id)) ;
+                if (!int.TryParse(splitItems[1], out antal)) ;
+                products = product.Find(x => x.ProductId == id);
+
+                while (products == null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Hittar inte ID");
+                    Console.ResetColor();
+                    Console.Write("Kommando: ");
+                    kommando = Console.ReadLine().ToUpper();
+                    splitItems = kommando.Split(' ');
+                    if (!int.TryParse(splitItems[0], out id));
+                    if (!int.TryParse(splitItems[1], out antal)) ;
+                    products = product.Find(x => x.ProductId == id);
+                }
+
+                productName = products.ProductName;
+                if (!int.TryParse(splitItems[1], out antal)) ;
+                price = products.Price;
+                totalPrice = products.Price * antal;
+
                 receipt.Add(new Receipt
                 {
-                    ProductId = Convert.ToInt32(splitItems[0]),
-                    Amount = Convert.ToInt32(splitItems[1]),
-                    TotalCost = Convert.ToInt32(splitItems[1])
+                    ProductName = productName,
+                    ProductId = id,
+                    Amount = antal,
+                    Price = price,
+                    TotalCost = totalPrice,
                 });
 
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -120,8 +163,7 @@ namespace Kassasystem
             Console.WriteLine(DateTime.Now);
             foreach (var receipts in receipt)
             {
-                //Vill ha med all information här, produktnamn, produktID, antal och total kostnad för hela köpet
-                Console.WriteLine($"Product ID: {receipts.ProductId}, Antal: {receipts.Amount}");
+                Console.WriteLine($"{receipts.ProductName} | ID: {receipts.ProductId} | Antal: {receipts.Amount} | Pris: {receipts.TotalCost}Kr");
             }
 
             JsonToFile();
@@ -134,11 +176,15 @@ namespace Kassasystem
 
         public void JsonToFile()
         {
+            var total = 0;
+            foreach (var receipts in receipt)
+            {
+                total += receipts.TotalCost;
+            }
             var date = DateTime.Now.ToString();
             string jsonString = JsonConvert.SerializeObject(receipt, Formatting.Indented);
-            //Console.WriteLine(jsonString);
             StreamWriter writeToFile = new StreamWriter(@$"RECEIPT_{DateTime.Now:yyyyMMdd}.txt", true);
-            writeToFile.WriteLine($"KVITTO: " + date + jsonString); writeToFile.Close();
+            writeToFile.WriteLine($"KVITTO: " + date + jsonString + "TOTALKOSTNAD: " + total); writeToFile.Close();
         }
     }
 }
