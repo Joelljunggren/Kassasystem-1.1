@@ -71,8 +71,18 @@ namespace Kassasystem
             if (kommando == "PAY")
                 SaveToFile();
 
-            if (!int.TryParse(splitItems[0], out int id)) ;
-            if (!int.TryParse(splitItems[1], out int antal)) ;
+
+            int id = 0;
+            int antal = 0;
+            while (!int.TryParse(splitItems[0], out id) || !int.TryParse(splitItems[1], out antal))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Fel ID eller antal");
+                Console.ResetColor();
+                Console.Write("Kommando: ");
+                kommando = Console.ReadLine();
+                splitItems = kommando.Split(' ');
+            }
 
             Products products = product.Find(x => x.ProductId == id);
             while (products == null)
