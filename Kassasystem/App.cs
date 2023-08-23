@@ -194,7 +194,7 @@ namespace Kassasystem
             var date = DateTime.Now.ToString();
             string jsonString = JsonConvert.SerializeObject(receipt, Formatting.Indented);
             StreamWriter writeToFile = new StreamWriter(@$"RECEIPT_{DateTime.Now:yyyyMMdd}.txt", true);
-            writeToFile.WriteLine($"KVITTO: " + date + jsonString + "TOTALKOSTNAD: " + total); writeToFile.Close();
+            writeToFile.WriteLine($"KVITTO: " + date + jsonString + "TOTALKOSTNAD: " + total + "Kr"); writeToFile.Close();
         }
     }
 }
